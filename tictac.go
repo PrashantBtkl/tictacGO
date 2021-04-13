@@ -1,10 +1,15 @@
 package main
 
+import (
+	"fmt"
+	"math/rand"
+)
 
 
 func main(){
 	board := [3][7]string{{"|"," ","|"," ","|"," ","|"},{"|"," ","|"," ","|"," ","|"},{"|"," ","|"," ","|"," ","|"}}
 	player := make(map[int]string)
+	turn := 1
 
 	/*
 	decidePlayer()
@@ -27,12 +32,68 @@ func main(){
 
 
 
+
+}
+
+func showBoard(b [3][7]string){
+
+	/*Prints the tic-tac-toe board*/
+
+	for  i := 0; i < 3; i++ {
+		fmt.Println()
+    	for j := 0; j < 7; j++ {
+        	fmt.Printf( b[i][j] )
+      }
+
+   }
 }
 
 
-func checkWin(b [3][7]int) int{
+func decidePlayer() int{
+	/*
+		decides random 'O' or 'X' role to the player
+	*/
 
-	res := [8] int {0,0,0,0,0,0,0,0}
+
+	player_turn := rand.Intn(2)
+
+	return player_turn
+}
+
+func playerCmd(){
+	/* takes the command from player
+		for eg. move 1,2
+				scoreboard
+				quit
+	*/
+}
+
+func playerMove(){
+	/*
+		takes input commands from playerCmd()
+	*/
+
+}
+
+
+
+func botMove(){
+	/*
+		 Random valid moves made by computer
+	*/
+
+}
+
+
+
+
+func checkWin(b [3][7]string) int{
+
+	/*
+		Checks if the player or the computer won
+	*/
+
+	res := [8] string {"","","","","","","",""}
 
 
   	res[0]= b[0][5] + b[1][3] + b[2][0]
