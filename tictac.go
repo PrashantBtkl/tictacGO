@@ -8,27 +8,44 @@ import (
 	"strings"
 	"strconv"
 )
-
+var (
+	board = [3][7]string{{"|"," ","|"," ","|"," ","|"},{"|"," ","|"," ","|"," ","|"},{"|"," ","|"," ","|"," ","|"}}
+	turn = 0
+	user_role = decidePlayer()
+	gameOver,win_role = checkWin(board, user_role)
+	BANNER_HEADER = `
+	 _   _      _             _             
+	| |_(_) ___| |_ __ _  ___| |_ ___   ___ 
+	| __| |/ __| __/ _\ |/ __| __/ _ \ / _ \
+	| |_| | (__| || (_| | (__| || (_) |  __/
+	 \__|_|\___|\__\__,_|\___|\__\___/ \___|
+	`  
+)
 
 func main(){
-	board := [3][7]string{{"|"," ","|"," ","|"," ","|"},{"|"," ","|"," ","|"," ","|"},{"|"," ","|"," ","|"," ","|"}}
-	turn := 0
-	gameOver,_ := checkWin(board)
 
-	user_role := decidePlayer()
-	fmt.Println(user_role)
+	fmt.Println(BANNER_HEADER)
 
-	for (turn < 9) || (gameOver != true){
+	for (gameOver != true){
 		showBoard(board)
-		checkWin(board)
 		
 		if turn % 2 == user_role {
 			board = playerCmd(board, user_role)
 		}else {
 			board = botMove(board, user_role)
 		}
+
+		gameOver,win_role = checkWin(board, user_role)
+
 		turn += 1
-	}	
+		if turn == 9{
+			fmt.Println("\nThe Game is a Draw")
+			main()
+		}
+
+	}
+	showBoard(board)
+	fmt.Println("\n",win_role," wins!")	
 }
 
 
@@ -49,19 +66,16 @@ func playerCmd(board [3][7]string, user_role int) [3][7]string{
     }
 
 	cmd := strings.Split(inp, " ")
-	fmt.Println(cmd[0])
-	fmt.Println(cmd[1])
-	points := cmd[1]
 
 	switch cmd[0]{
 	case "move":
-		i,j := move(points, board, user_role)
+		i,j := move(cmd[1], board, user_role)
 		board = playerMove(i,j, board, user_role)
-	case "quit":
+	case "quit\n":
 		quit()
 	default:
-		panic("Enter valid commands (move, quit, scoreboard):")
-		quit()
+		fmt.Println("Enter valid commands (move, quit)")
+		playerCmd(board, user_role)
 	}
 
 	return board
@@ -70,19 +84,24 @@ func playerCmd(board [3][7]string, user_role int) [3][7]string{
 func move(points string, board [3][7]string, user_role int) (int,int){
 	/* evaluates the index of the board from user
 		eg:- if input is 1,2 our board indices would be 1,5
+		used in the function playerCmd() for the user command "move"
 	*/
 	bp := make(map[int]int)
 	bp[0],bp[1],bp[2] = 1,3,5
 
-	i,err := strconv.Atoi(string(points[0]))
-	if err != nil {
-        panic(err)
-    }
-	j,err := strconv.Atoi(string(points[2]))
-	if err != nil {
-        panic(err)
+	i,err_i := strconv.Atoi(string(points[0]))
+	j,err_j := strconv.Atoi(string(points[2]))
+	if err_i != nil || err_j != nil{
+        fmt.Println("Enter valid co-ordinates ranging from 0,0 - 2,2")
+        playerCmd(board, user_role)
     }
 	return i,bp[j]
+}
+
+func quit(){
+	/*used in the function playerCmd() for the user command "quit"*/
+	fmt.Println("Computer wins")
+	os.Exit(1)
 }
 
 
@@ -121,7 +140,6 @@ func botMove(board [3][7]string, user_role int) [3][7]string{
 	bot_role := 1 ^ user_role
 	
 	i,j := rand_idx()
-	fmt.Println(i,j)
 	for board[i][j] != " "{
 		i,j = rand_idx()
 	}
@@ -133,17 +151,20 @@ func botMove(board [3][7]string, user_role int) [3][7]string{
 }
 
 func rand_idx() (int,int) {
+	/* Used to generate random index on the board for 
+		called by botMove()
+	*/
 		i := rand.Intn(3)
 		j := rand.Intn(7)
 
 		return i,j
-	}
+}
 
 
 func showBoard(b [3][7]string){
+	/* Prints the tic-tac-toe board */
 
-	/*Prints the tic-tac-toe board*/
-	 fmt.Println("\n")
+	fmt.Println()
 	for  i := 0; i < 3; i++ {
 		fmt.Println()
     	for j := 0; j < 7; j++ {
@@ -166,16 +187,17 @@ func decidePlayer() int{
 
 
 
-func checkWin(b [3][7]string) (bool,int){
+func checkWin(b [3][7]string , user_role int) (bool,string){
 
 	/*
 		Checks if the player or the computer won
 	*/
-
+	winner := make(map[int]string)
+	winner[user_role] , winner[1^user_role] = "User","Computer"
 	res := [8] string {"","","","","","","",""}
 
 
-  	res[0]= b[0][5] + b[1][3] + b[2][0]
+  	res[0]= b[0][5] + b[1][3] + b[2][1]
   	res[1]= b[0][1] + b[1][1] + b[2][1]
   	res[2]= b[0][5] + b[1][5] + b[2][5]
   	res[3]= b[0][1] + b[1][3] + b[2][5]
@@ -186,16 +208,11 @@ func checkWin(b [3][7]string) (bool,int){
 
   	for _, v := range res {
     	if v == "OOO" {
-      		return true,0
+      		return true,winner[0]
     	} else if v == "XXX"{
-      		return true,1
+      		return true,winner[1]
     }
   }
-  return false,-1
+  return false,""
 }
 
-
-func quit(){
-	fmt.Println("bye")
-	os.Exit(1)
-}
