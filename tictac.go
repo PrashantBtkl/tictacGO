@@ -10,6 +10,7 @@ import (
 )
 var (
 	board = [3][7]string{{"|"," ","|"," ","|"," ","|"},{"|"," ","|"," ","|"," ","|"},{"|"," ","|"," ","|"," ","|"}}
+	in = bufio.NewReader(os.Stdin)
 	turn = 0
 	user_role = decidePlayer()
 	gameOver,win_role = checkWin(board, user_role)
@@ -40,7 +41,7 @@ func main(){
 		turn += 1
 		if turn == 9{
 			fmt.Println("\nThe Game is a Draw")
-			main()
+			os.Exit(1)
 		}
 
 	}
@@ -54,35 +55,34 @@ func main(){
 func playerCmd(board [3][7]string, user_role int) [3][7]string{
 	/* takes the command from player
 		for eg. move 1,2
-				scoreboard
 				quit
 	*/
-	in := bufio.NewReader(os.Stdin)
 	fmt.Println()
-	fmt.Printf("tictactoe>")
-    inp, err := in.ReadString('\n')
+	fmt.Printf("tictactoe> ")
+	inp, err := in.ReadString('\n')
     if err != nil{
         panic(err)
     }
-
 	cmd := strings.Split(inp, " ")
 
 	switch cmd[0]{
 	case "move":
-		i,j := move(cmd[1], board, user_role)
-		board = playerMove(i,j, board, user_role)
+		board = playerMove(cmd[1], board, user_role)
 	case "quit\n":
 		quit()
 	default:
 		fmt.Println("Enter valid commands (move, quit)")
-		playerCmd(board, user_role)
+		board = playerCmd(board, user_role)
 	}
-
 	return board
 }
 
-func move(points string, board [3][7]string, user_role int) (int,int){
-	/* evaluates the index of the board from user
+
+func playerMove(points string, board [3][7]string, user_role int) [3][7]string{
+	/*
+		takes input co-ordinates and fills the board
+
+		evaluates the index of the board from user
 		eg:- if input is 1,2 our board indices would be 1,5
 		used in the function playerCmd() for the user command "move"
 	*/
@@ -91,41 +91,25 @@ func move(points string, board [3][7]string, user_role int) (int,int){
 
 	i,err_i := strconv.Atoi(string(points[0]))
 	j,err_j := strconv.Atoi(string(points[2]))
-	if err_i != nil || err_j != nil{
-        fmt.Println("Enter valid co-ordinates ranging from 0,0 - 2,2")
-        playerCmd(board, user_role)
+	if err_i != nil || err_j != nil || i>=3 || j>=3{
+    	fmt.Println("Enter valid co-ordinates ranging from 0,0 - 2,2")
+        os.Exit(1)
     }
-	return i,bp[j]
-}
+    j = bp[j]
 
-func quit(){
-	/*used in the function playerCmd() for the user command "quit"*/
-	fmt.Println("Computer wins")
-	os.Exit(1)
-}
-
-
-func playerMove(i int, j int, board [3][7]string, user_role int) [3][7]string{
-	/*
-		takes input value from playerCmd()
-	*/
-
-  if board[i][j] != " " {
-    fmt.Println("invalid move, place already taken")
-    playerCmd(board, user_role)
-  }
-
-  if i > 2 || j > 6 {
-    fmt.Println("Please enter valid matrix index from 0,0 - 2,2")
-    playerCmd(board, user_role)
-  }
-
-  if user_role == 0{
-    board[i][j] = "O"
+  	if board[i][j] == " " {
+  		if user_role == 0{
+    		board[i][j] = "O"
+  	}else{
+    	board[i][j] = "X"
+  	}
+    	
   }else{
-    board[i][j] = "X"
+  	fmt.Println("invalid move, place already taken")
+  	board = playerCmd(board, user_role)
   }
   return board
+
 }
 
 
@@ -150,6 +134,15 @@ func botMove(board [3][7]string, user_role int) [3][7]string{
 	return board
 }
 
+func quit(){
+	/*
+		used in the function playerCmd() for the user command "quit"
+	*/
+	fmt.Println("Computer wins")
+	os.Exit(1)
+}
+
+
 func rand_idx() (int,int) {
 	/* Used to generate random index on the board for 
 		called by botMove()
@@ -173,9 +166,6 @@ func showBoard(b [3][7]string){
    }
 }
 
-
-
-
 func decidePlayer() int{
 	/*
 		decides random 'O' or 'X' role to the player
@@ -184,7 +174,6 @@ func decidePlayer() int{
 
 	return user_role
 }
-
 
 
 func checkWin(b [3][7]string , user_role int) (bool,string){
