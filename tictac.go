@@ -20,7 +20,7 @@ var (
 	| __| |/ __| __/ _\ |/ __| __/ _ \ / _ \
 	| |_| | (__| || (_| | (__| || (_) |  __/
 	 \__|_|\___|\__\__,_|\___|\__\___/ \___|
-	`  
+	 	`  
 )
 
 func main(){
@@ -54,14 +54,13 @@ func main(){
 
 func playerCmd(board [3][7]string, user_role int) [3][7]string{
 	/* takes the command from player
-		for eg. move 1,2
-				quit
+		for eg. move 1,2 ; quit
 	*/
 	fmt.Println()
 	fmt.Printf("tictactoe> ")
 	inp, err := in.ReadString('\n')
     if err != nil{
-        panic(err)
+       panic(err)
     }
 	cmd := strings.Split(inp, " ")
 
@@ -76,6 +75,7 @@ func playerCmd(board [3][7]string, user_role int) [3][7]string{
 	}
 	return board
 }
+
 
 
 func playerMove(points string, board [3][7]string, user_role int) [3][7]string{
@@ -100,18 +100,15 @@ func playerMove(points string, board [3][7]string, user_role int) [3][7]string{
   	if board[i][j] == " " {
   		if user_role == 0{
     		board[i][j] = "O"
+  		}else{
+    		board[i][j] = "X"
+  		}   	
   	}else{
-    	board[i][j] = "X"
-  	}
-    	
-  }else{
-  	fmt.Println("invalid move, place already taken")
-  	board = playerCmd(board, user_role)
-  }
+  		fmt.Println("invalid move, place already taken")
+  		board = playerCmd(board, user_role)
+    }
   return board
-
 }
-
 
 
 
@@ -134,6 +131,8 @@ func botMove(board [3][7]string, user_role int) [3][7]string{
 	return board
 }
 
+
+
 func quit(){
 	/*
 		used in the function playerCmd() for the user command "quit"
@@ -141,6 +140,7 @@ func quit(){
 	fmt.Println("Computer wins")
 	os.Exit(1)
 }
+
 
 
 func rand_idx() (int,int) {
@@ -152,6 +152,7 @@ func rand_idx() (int,int) {
 
 		return i,j
 }
+
 
 
 func showBoard(b [3][7]string){
@@ -166,6 +167,8 @@ func showBoard(b [3][7]string){
    }
 }
 
+
+
 func decidePlayer() int{
 	/*
 		decides random 'O' or 'X' role to the player
@@ -174,6 +177,7 @@ func decidePlayer() int{
 
 	return user_role
 }
+
 
 
 func checkWin(b [3][7]string , user_role int) (bool,string){
